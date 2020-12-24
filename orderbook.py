@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
+
 import os
 import sys
 import logging
 import argparse,  traceback
 
 #modul rekayasa waktu
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,timezone
 
 # pendownload halaman web, membaca halaman tanpa download, cek update realtime
 import requests
@@ -14,13 +15,16 @@ import requests
 #modul speed up pandas
 from functools import lru_cache
 
-#mendapatkan waktu saat ini
-waktu=datetime.now()
-print(waktu)
+# download saham dan harga saham
+import data_emiten
+
+
 
 #testing/produksi?
-testing = False #or True
+testing =  True  #or False
 
+
+ 
 def send_mail(body):
 
 
@@ -45,51 +49,6 @@ def send_mail(body):
     server.sendmail(message['From'], emaillist, msg_body)
     server.quit()
 
-#!xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-#FIXME: PR untuk dirapikan
-#FIXME: kontrol cron tab
-#TODO: otomatisasi update populasi
-
-populasi=[{'saham': 'BTEL', 'harga': '50'},{'saham': 'CANI', 'harga': '113'}, {'saham': 'FREN', 'harga': '72'}, {'saham': 'GHON', 'harga': '1675'}, {'saham': 'HELI', 'harga': '210'}, {'saham': 'HITS', 'harga': '500'}, {'saham': 'IATA', 'harga': '50'}, {'saham': 'IBST', 'harga': '8900'}, {'saham': 'INDX', 'harga': '55'}, {'saham': 'INPS', 'harga': '3200'}, {'saham': 'IPCC', 'harga': '540'}, {'saham': 'IPCM', 'harga': '340'}, {'saham': 'JSKY', 'harga': '240'}, {'saham': 'KARW', 'harga': '78'}, {'saham': 'KOPI', 'harga': '450'}, {'saham': 'LAPD', 'harga': '50'}, {'saham': 'LCKM', 'harga': '366'}, {'saham': 'LRNA', 'harga': '200'}, {'saham': 'MBSS', 'harga': '570'}, {'saham': 'MIRA', 'harga': '50'}, {'saham': 'MPOW', 'harga': '74'}, {'saham': 'NELY', 'harga': '141'}, {'saham': 'OASA', 'harga': '376'}, {'saham': 'PORT', 'harga': '412'}, {'saham': 'POWR', 'harga': '775'}, {'saham': 'PPRE', 'harga': '286'}, {'saham': 'PSSI', 'harga': '170'}, {'saham': 'PTIS', 'harga': '165'}, {'saham': 'RAJA', 'harga': '280'}, {'saham': 'RIGS', 'harga': '284'}, {'saham': 'SAFE', 'harga': '188'}, {'saham': 'SDMU', 'harga': '77'}, {'saham': 'SHIP', 'harga': '625'}, {'saham': 'SMDR', 'harga': '314'}, {'saham': 'SUPR', 'harga': '4100'}, {'saham': 'TAMU', 'harga': '50'}, {'saham': 
-'TAXI', 'harga': '50'}, {'saham': 'TCPI', 'harga': '6350'}, {'saham': 'TGRA', 'harga': '145'}, {'saham': 'TMAS', 'harga': '130'}, {'saham': 'TNCA', 'harga': '462'}, {'saham': 'TOWR', 'harga': '985'}, {'saham': 'TPMA', 'harga': '366'}, {'saham': 'TRUB', 'harga': '0'}, {'saham': 'TRUK', 'harga': '180'}, {'saham': 'WEHA', 'harga': '74'}, {'saham': 'WINS', 'harga': '98'}, {'saham': 'ZBRA', 'harga': '118'}, {'saham': 'AGII', 'harga': '840'}, {'saham': 'APEX', 'harga': '494'}, {'saham': 'ARII', 'harga': '404'}, {'saham': 'ARTI', 'harga': '50'}, {'saham': 'ATPK', 'harga': '0'}, {'saham': 'BORN', 'harga': '0'}, {'saham': 'BOSS', 'harga': '195'}, {'saham': 'BSSR', 'harga': '1700'}, {'saham': 'BYAN', 'harga': '14525'}, {'saham': 'CITA', 'harga': '2550'}, {'saham': 'CTTH', 'harga': '58'}, {'saham': 'DEWA', 'harga': 
-'50'}, {'saham': 'DKFT', 'harga': '236'}, {'saham': 'ESSA', 'harga': '242'}, {'saham': 'FIRE', 'harga': '1320'}, {'saham': 'GEMS', 'harga': '2550'}, {'saham': 'GTBO', 'harga': '75'}, {'saham': 'KKGI', 'harga': '360'}, {'saham': 'MBAP', 'harga': '2830'}, {'saham': 'MDKA', 'harga': '2240'}, {'saham': 'MITI', 'harga': '127'}, {'saham': 'MYOH', 'harga': '1275'}, {'saham': 'PKPK', 'harga': '58'}, {'saham': 'PSAB', 'harga': '250'}, {'saham': 'RUIS', 'harga': '308'}, {'saham': 'SMMT', 'harga': '126'}, {'saham': 'TOBA', 'harga': '525'}, {'saham': 'ZINC', 'harga': '230'}, {'saham': 'AMIN', 'harga': '280'}, {'saham': 'ARGO', 'harga': '1845'}, {'saham': 'AUTO', 'harga': '1180'}, {'saham': 'BATA', 'harga': '640'}, {'saham': 'BELL', 'harga': '162'}, {'saham': 'BIMA', 'harga': '50'}, {'saham': 'BOLT', 'harga': '800'}, 
-{'saham': 'BRAM', 'harga': '5000'}, {'saham': 'CNTB', 'harga': '250'}, {'saham': 'CNTX', 'harga': '218'}, {'saham': 'ERTX', 'harga': '127'}, {'saham': 'ESTI', 'harga': '57'}, {'saham': 'GDYR', 'harga': '1440'}, {'saham': 'GMFI', 'harga': '160'}, {'saham': 'HDTX', 'harga': '120'}, {'saham': 'IKBI', 'harga': '228'}, {'saham': 'IMAS', 'harga': '1505'}, {'saham': 'INDR', 'harga': '2890'}, {'saham': 'JECC', 'harga': '6250'}, {'saham': 'KBLM', 'harga': '232'}, {'saham': 'KRAH', 'harga': '436'}, {'saham': 'LPIN', 'harga': '256'}, {'saham': 'MASA', 'harga': '1030'}, {'saham': 'MYTX', 'harga': '51'}, {'saham': 'NIPS', 'harga': '282'}, {'saham': 'POLY', 'harga': '63'}, {'saham': 'PRAS', 'harga': '122'}, {'saham': 'RICY', 'harga': '115'}, {'saham': 'SCCO', 'harga': '10300'}, {'saham': 'SMSM', 'harga': '1365'}, {'saham': 'SSTM', 'harga': '565'}, {'saham': 'STAR', 'harga': '109'}, {'saham': 'TFCO', 'harga': '478'}, {'saham': 'TRIS', 'harga': '200'}, {'saham': 'UNIT', 'harga': '167'}, {'saham': 'VOKS', 'harga': '260'}, {'saham': 'ACST', 'harga': '318'}, {'saham': 'ARMY', 'harga': '50'}, {'saham': 'BAPA', 'harga': '50'}, {'saham': 'BIKA', 'harga': '190'}, {'saham': 'BIPP', 'harga': '50'}, {'saham': 'BKDP', 'harga': '52'}, {'saham': 'COWL', 'harga': '50'}, {'saham': 'CSIS', 'harga': '54'}, {'saham': 'DART', 'harga': '218'}, {'saham': 'DFAM', 'harga': '224'}, {'saham': 'DGIK', 'harga': '50'}, {'saham': 'DUTI', 'harga': '3880'}, {'saham': 'ELTY', 'harga': '50'}, {'saham': 'EMDE', 'harga': '192'}, {'saham': 'FMII', 'harga': '570'}, {'saham': 'FORZ', 'harga': '50'}, {'saham': 'GAMA', 'harga': '50'}, {'saham': 'GMTD', 'harga': '17950'}, {'saham': 'GPRA', 'harga': '87'}, {'saham': 'GWSA', 'harga': '113'}, {'saham': 'IDPR', 'harga': '216'}, {'saham': 'JKON', 'harga': '338'}, {'saham': 'JRPT', 'harga': '610'}, {'saham': 'MKPI', 
-'harga': '28000'}, {'saham': 'MMLP', 'harga': '304'}, {'saham': 'MTLA', 'harga': '434'}, {'saham': 'MTRA', 'harga': '244'}, {'saham': 'MTSM', 'harga': '202'}, {'saham': 'MYRXP', 'harga': '50'}, {'saham': 'NRCA', 'harga': '380'}, {'saham': 'NUSA', 'harga': '50'}, {'saham': 'OMRE', 'harga': '330'}, {'saham': 'PBSA', 'harga': '660'}, {'saham': 'PLIN', 'harga': '2600'}, {'saham': 'POLL', 'harga': '4670'}, {'saham': 'RBMS', 'harga': '53'}, {'saham': 'RDTX', 'harga': '5300'}, {'saham': 'RISE', 'harga': '428'}, {'saham': 'RODA', 'harga': '57'}, {'saham': 'SCBD', 'harga': '0'}, {'saham': 'LAND', 'harga': '180'}, 
-{'saham': 'SMDM', 'harga': '107'}, {'saham': 'WEGE', 'harga': '272'}, {'saham': 'ABBA', 'harga': '78'}, {'saham': 'ABMM', 'harga': '880'}, {'saham': 'AIMS', 'harga': '136'}, {'saham': 'AKKU', 'harga': '50'}, {'saham': 'AKSI', 'harga': '374'}, {'saham': 'AMRT', 'harga': '730'}, {'saham': 'APII', 'harga': '157'}, {'saham': 'ARTA', 'harga': '310'}, {'saham': 'ASGR', 'harga': '835'}, {'saham': 'ATIC', 'harga': '590'}, {'saham': 'BAYU', 'harga': '1150'}, {'saham': 'BLTZ', 'harga': '3150'}, {'saham': 'BMSR', 'harga': '90'}, {'saham': 'BNBR', 'harga': '50'}, {'saham': 'BOGA', 'harga': '1330'}, {'saham': 'BUVA', 
-'harga': '62'}, {'saham': 'CARS', 'harga': '50'}, {'saham': 'CENT', 'harga': '143'}, {'saham': 'CLPI', 'harga': '755'}, {'saham': 'CMPP', 'harga': '184'}, {'saham': 'CNKO', 'harga': '50'}, {'saham': 'CSAP', 'harga': '370'}, {'saham': 'DAYA', 'harga': '420'}, {'saham': 'DNET', 'harga': '3450'}, {'saham': 'DSSA', 'harga': '14450'}, {'saham': 'DWGL', 'harga': '172'}, {'saham': 'DYAN', 'harga': '58'}, {'saham': 'ECII', 'harga': '700'}, {'saham': 'EMTK', 'harga': '14200'}, {'saham': 'EPMT', 'harga': '2120'}, {'saham': 'FAST', 'harga': '1040'}, {'saham': 'FISH', 'harga': '2800'}, {'saham': 'FORU', 'harga': '140'}, {'saham': 'GEMA', 'harga': '336'}, {'saham': 'GLOB', 'harga': '118'}, {'saham': 'GMCW', 'harga': '0'}, {'saham': 'GOLD', 'harga': '234'}, {'saham': 'GREN', 'harga': '0'}, {'saham': 'HEAL', 'harga': '3700'}, {'saham': 'HERO', 'harga': '865'}, {'saham': 'HEXA', 'harga': '3390'}, {'saham': 'HOME', 'harga': '50'}, {'saham': 'HOTL', 'harga': '50'}, {'saham': 'ICON', 'harga': '106'}, {'saham': 'INPP', 'harga': '700'}, {'saham': 'INTA', 'harga': '202'}, {'saham': 'INTD', 'harga': '115'}, {'saham': 'ITMA', 'harga': '530'}, {'saham': 'ITTG', 'harga': '0'}, {'saham': 'JGLE', 'harga': '50'}, {'saham': 'JIHD', 'harga': '442'}, {'saham': 'JSPT', 'harga': '840'}, {'saham': 'JTPE', 'harga': '930'}, {'saham': 'KBLV', 'harga': '430'}, {'saham': 'KIOS', 'harga': '144'}, {'saham': 'KOBX', 'harga': '114'}, {'saham': 'KOIN', 'harga': '101'}, {'saham': 'KONI', 'harga': '490'}, {'saham': 'KPIG', 'harga': '106'}, {'saham': 'LMAS', 'harga': '50'}, {'saham': 'LPLI', 'harga': '82'}, {'saham': 'MABA', 'harga': '50'}, {'saham': 'MAPB', 'harga': '1305'}, {'saham': 'MARI', 'harga': '50'}, {'saham': 'MCAS', 'harga': '3340'}, {'saham': 'MDIA', 'harga': '59'}, {'saham': 'MDRN', 'harga': '50'}, {'saham': 'MFMI', 'harga': '695'}, {'saham': 'MICE', 'harga': '296'}, {'saham': 'MIDI', 'harga': '1895'}, {'saham': 'MKNT', 'harga': '50'}, {'saham': 'MLPT', 'harga': '720'}, {'saham': 'MPMX', 'harga': '498'}, {'saham': 'MSIN', 'harga': '300'}, 
-{'saham': 'MSKY', 'harga': '690'}, {'saham': 'MTDL', 'harga': '1605'}, {'saham': 'NASA', 'harga': '104'}, {'saham': 'NFCX', 'harga': '1685'}, {'saham': 'PANR', 'harga': '170'}, {'saham': 'PDES', 'harga': '442'}, {'saham': 'PGLI', 'harga': '256'}, {'saham': 'PJAA', 'harga': '670'}, {'saham': 'PNSE', 'harga': '1070'}, {'saham': 'PRDA', 'harga': '3550'}, {'saham': 'PRIM', 'harga': '242'}, {'saham': 'PSKT', 'harga': '50'}, {'saham': 'PTSP', 'harga': '3980'}, {'saham': 'PUDP', 'harga': '246'}, {'saham': 'PZZA', 'harga': '840'}, {'saham': 'RANC', 'harga': '474'}, {'saham': 'RIMO', 'harga': '50'}, {'saham': 'SAME', 'harga': '280'}, {'saham': 'SDPC', 'harga': '110'}, {'saham': 'SHID', 'harga': '2600'}, {'saham': 'SIAP', 'harga': '0'}, {'saham': 'SIMA', 'harga': '50'}, {'saham': 'SKYB', 'harga': '51'}, {'saham': 'SONA', 'harga': '5650'}, {'saham': 'SPTO', 'harga': '595'}, {'saham': 'SQMI', 'harga': '356'}, {'saham': 'SRAJ', 'harga': '196'}, {'saham': 'SRTG', 'harga': '3420'}, {'saham': 'SWAT', 'harga': '114'}, {'saham': 'TGKA', 'harga': '7200'}, {'saham': 'TIRA', 'harga': '252'}, {'saham': 'TMPI', 'harga': '0'}, {'saham': 'TMPO', 'harga': '150'}, {'saham': 'TRIL', 'harga': '50'}, {'saham': 'TRIO', 'harga': '426'}, {'saham': 'TURI', 'harga': '1310'}, {'saham': 'WAPO', 'harga': '66'}, {'saham': 'WICO', 'harga': '434'}, {'saham': 'FILM', 'harga': '216'}, {'saham': 'KPAL', 'harga': '50'},
-{'saham': 'ICBP', 'harga': '9700'}, {'saham': 'KLBF', 'harga': '1540'}, {'saham': 'INDF', 'harga': '6825'}, {'saham': 'BBCA', 'harga': '34000'}, {'saham': 'BBNI', 'harga': '6650'}, {'saham': 'BBRI', 'harga': '4280'}, {'saham': 'BBTN', 'harga': '1940'}, {'saham': 'BMRI', 'harga': '6700'}, {'saham': 'JSMR', 'harga': '4710'}, {'saham': 'PGAS', 'harga': '1790'}, {'saham': 'TLKM', 'harga': '3510'}, {'saham': 
-'ANTM', 'harga': '1950'}, {'saham': 'SRIL', 'harga': '284'}, {'saham': 'BSDE', 'harga': '1300'}, {'saham': 'PTPP', 'harga': '1770'}, {'saham': 'WSKT', 'harga': '1500'}, {'saham': 'LPKR', 'harga': '244'}, {'saham': 'PWON', 'harga': '575'}, {'saham': 'LPPF', 'harga': '1420'}, {'saham': 'BMTR', 'harga': '314'}, {'saham': 'TPIA', 'harga': '9075'}, {'saham': 'WSBP', 'harga': '272'}, {'saham': 'BJBR', 'harga': '1655'}, {'saham': 'EXCL', 'harga': '2790'}, {'saham': 'INDY', 'harga': '1880'}, {'saham': 'TRAM', 'harga': '50'}, {'saham': 'INCO', 'harga': '5375'}, {'saham': 'PTBA', 'harga': '2980'}, {'saham': 'ADHI', 'harga': '1650'}, {'saham': 'MYRX', 'harga': '50'}, {'saham': 'AKRA', 'harga': '3370'}, {'saham': 'SCMA', 'harga': '2150'}, {'saham': 'MPPA', 'harga': '115'}, {'saham': 'SILO', 'harga': '5525'}, {'saham': 'DSFI', 'harga': '75'}, {'saham': 'DSNG', 'harga': '630'}, {'saham': 'SIMP', 'harga': '416'}, {'saham': 'EKAD', 'harga': '1275'}, {'saham': 'MARK', 'harga': '770'}, {'saham': 'SMCB', 'harga': '1350'}, {'saham': 'KINO', 'harga': '2820'}, {'saham': 'SIDO', 'harga': '780'}, {'saham': 'BNII', 'harga': '286'}, {'saham': 'CASA', 'harga': '384'}, {'saham': 'PNLF', 'harga': '264'}, {'saham': 'BIRD', 'harga': '1520'}, {'saham': 'GIAA', 'harga': '454'}, {'saham': 'META', 'harga': '169'}, {'saham': 'SOCI', 'harga': '300'}, {'saham': 'ENRG', 'harga': '117'}, {'saham': 'PTRO', 'harga': '2100'}, {'saham': 'SMRU', 'harga': '50'}, {'saham': 'ADMG', 'harga': '157'}, {'saham': 'INDS', 'harga': '1930'}, {'saham': 'PTSN', 'harga': '240'}, {'saham': 'MDLN', 'harga': '51'}, {'saham': 'BCIP', 'harga': '74'}, {'saham': 'DILD', 'harga': '228'}, {'saham': 'KIJA', 'harga': '230'}, {'saham': 'LCGP', 'harga': '114'}, {'saham': 'LPCK', 'harga': '1545'}, {'saham': 'NIRO', 'harga': '152'}, {'saham': 'TOPS', 'harga': '0'}, {'saham': 'TOTL', 'harga': '404'}, {'saham': 'DPUM', 'harga': '53'}, {'saham': 'ERAA', 'harga': '2060'}, {'saham': 'LTLS', 'harga': '490'}, {'saham': 'MINA', 'harga': '50'}, {'saham': 'OKAS', 'harga': '114'}, {'saham': 'PLAS', 'harga': '50'}, {'saham': 'SUGI', 'harga': '50'}, {'saham': 'TELE', 'harga': '121'}, {'saham': 'VIVA', 'harga': '53'}, {'saham': 'AALI', 'harga': '12075'}, {'saham': 'BWPT', 'harga': '143'}, {'saham': 'LSIP', 'harga': '1270'}, {'saham': 'INKP', 'harga': '10400'}, {'saham': 'CPIN', 'harga': '6600'}, {'saham': 'JPFA', 'harga': '1635'}, {'saham': 'KRAS', 'harga': '464'}, {'saham': 'NIKL', 'harga': '1750'}, {'saham': 'SMBR', 'harga': '1295'}, {'saham': 'WTON', 'harga': '430'}, {'saham': 'MYOR', 'harga': '2740'}, {'saham': 'AISA', 'harga': '416'}, {'saham': 'INAF', 'harga': '4160'}, {'saham': 'KAEF', 'harga': '4280'}, {'saham': 'BDMN', 'harga': '3340'}, {'saham': 'BNGA', 'harga': '1065'}, {'saham': 'PNBN', 'harga': '1165'}, {'saham': 'AGRO', 'harga': '1035'}, {'saham': 'BEKS', 'harga': '102'}, {'saham': 'BJTM', 'harga': '725'}, {'saham': 'BNLI', 'harga': '2660'}, {'saham': 'KREN', 'harga': '85'}, {'saham': 'MCOR', 'harga': '137'}, {'saham': 'ISAT', 'harga': '4560'}, {'saham': 'LEAD', 'harga': '50'}, {'saham': 'TBIG', 'harga': '1485'}, {'saham': 'MEDC', 'harga': '665'}, {'saham': 'ELSA', 'harga': '380'}, {'saham': 'ITMG', 'harga': '14875'}, {'saham': 'TINS', 'harga': '1605'}, {'saham': 'BIPI', 'harga': '50'}, {'saham': 'DOID', 'harga': '412'}, {'saham': 'HRUM', 'harga': '3220'}, {'saham': 'GJTL', 'harga': '620'}, {'saham': 'KBLI', 'harga': '406'}, {'saham': 'PBRX', 'harga': '262'}, {'saham': 'PPRO', 
-'harga': '0'}, {'saham': 'SMRA', 'harga': '895'}, {'saham': 'ASRI', 'harga': '278'}, {'saham': 'BEST', 'harga': '204'}, {'saham': 'CTRA', 'harga': '1070'}, {'saham': 'DMAS', 'harga': '250'}, {'saham': 'SSIA', 'harga': '580'}, {'saham': 'TARA', 'harga': '50'}, {'saham': 'MAPI', 'harga': '920'}, {'saham': 'ACES', 'harga': '1850'}, {'saham': 'BHIT', 'harga': '73'}, {'saham': 'BRMS', 'harga': '88'}, {'saham': 'LINK', 'harga': '2670'}, {'saham': 'MIKA', 'harga': '2680'}, {'saham': 'MLPL', 'harga': '73'}, {'saham': 'POOL', 'harga': '50'}, {'saham': 'RALS', 'harga': '890'}, {'saham': 'ANJT', 'harga': '690'}, {'saham': 'BISI', 'harga': '1080'}, {'saham': 'BTEK', 'harga': '50'}, {'saham': 'GOLL', 'harga': '50'}, {'saham': 'GZCO', 'harga': '50'}, {'saham': 'IIKP', 'harga': '50'}, {'saham': 'JAWA', 'harga': '96'}, {'saham': 'KMTR', 'harga': '350'}, {'saham': 'MAGP', 'harga': '0'}, {'saham': 'MGRO', 'harga': '765'}, {'saham': 'PALM', 'harga': '324'}, {'saham': 'PCAR', 'harga': '815'}, {'saham': 'SGRO', 'harga': '1710'}, {'saham': 'SMAR', 'harga': '3950'}, {'saham': 'TBLA', 'harga': '830'}, {'saham': 'UNSP', 'harga': '117'}, {'saham': 'AKPI', 'harga': '510'}, {'saham': 'ALDO', 'harga': '400'}, {'saham': 'ALKA', 'harga': '272'}, {'saham': 'ALMI', 'harga': '260'}, {'saham': 'AMFG', 'harga': '2910'}, {'saham': 'APLI', 'harga': '183'}, {'saham': 'BAJA', 'harga': '133'}, {'saham': 'BRNA', 'harga': '1125'}, {'saham': 'BTON', 'harga': '286'}, {'saham': 'BUDI', 'harga': '97'}, {'saham': 'CTBN', 'harga': '2800'}, {'saham': 'DPNS', 'harga': '250'}, {'saham': 'ETWA', 'harga': '62'}, {'saham': 'FASW', 'harga': '7475'}, {'saham': 
-'FPNI', 'harga': '156'}, {'saham': 'GDST', 'harga': '122'}, {'saham': 'IGAR', 'harga': '352'}, {'saham': 'INAI', 'harga': '334'}, {'saham': 'INCF', 'harga': '73'}, {'saham': 'INCI', 'harga': '825'}, {'saham': 'INRU', 'harga': '885'}, {'saham': 'IPOL', 'harga': '93'}, {'saham': 'ISSP', 'harga': '175'}, {'saham': 'JKSW', 'harga': '60'}, {'saham': 'JPRS', 'harga': '0'}, {'saham': 'KBRI', 'harga': '50'}, {'saham': 'MAIN', 'harga': '840'}, {'saham': 'MDKI', 'harga': '238'}, {'saham': 'MLIA', 'harga': '530'}, {'saham': 'PBID', 'harga': '1330'}, {'saham': 'PICO', 'harga': '143'}, {'saham': 'SIPD', 'harga': '1250'}, {'saham': 'SPMA', 'harga': '316'}, {'saham': 'SRSN', 'harga': '61'}, {'saham': 'SULI', 'harga': '50'}, {'saham': 'TALF', 'harga': '314'}, {'saham': 'TBMS', 'harga': '940'}, {'saham': 'TDPM', 'harga': 
-'150'}, {'saham': 'TIRT', 'harga': '50'}, {'saham': 'TRST', 'harga': '400'}, {'saham': 'UNIC', 'harga': '4910'}, {'saham': 'YPAS', 'harga': '438'}, {'saham': 'SWAT', 'harga': '114'}, {'saham': 'ROTI', 'harga': '1335'}, {'saham': 'ADES', 'harga': '1560'}, {'saham': 'ALTO', 'harga': '308'}, {'saham': 'CAMP', 'harga': '330'}, {'saham': 'CEKA', 'harga': '1795'}, {'saham': 'CINT', 'harga': '242'}, {'saham': 'CLEO', 'harga': '580'}, {'saham': 'DLTA', 'harga': '4280'}, {'saham': 'KDSI', 'harga': '870'}, {'saham': 'KIAS', 'harga': '52'}, {'saham': 'LION', 'harga': '364'}, {'saham': 'LMSH', 'harga': '460'}, {'saham': 'DVLA', 'harga': '2490'}, {'saham': 'HOKI', 'harga': '1090'}, {'saham': 'HRTA', 'harga': '272'}, {'saham': 'KICI', 'harga': '250'}, {'saham': 'LMPI', 'harga': '84'}, {'saham': 'MOLI', 'harga': '845'}, {'saham': 'MBTO', 'harga': '94'}, {'saham': 'MERK', 'harga': '3280'}, {'saham': 'MLBI', 'harga': '10000'}, {'saham': 'MRAT', 'harga': '153'}, {'saham': 'PSDN', 'harga': '121'}, {'saham': 'PYFA', 'harga': '1020'}, {'saham': 'RMBA', 'harga': '362'}, {'saham': 'SCPI', 'harga': '29000'}, {'saham': 'SKBM', 'harga': '338'}, {'saham': 'SKLT', 'harga': '1585'}, {'saham': 'STTP', 'harga': '9000'}, {'saham': 'TCID', 'harga': '6700'}, {'saham': 'TSPC', 'harga': '1395'}, {'saham': 'ULTJ', 'harga': '1660'}, {'saham': 'WIIM', 'harga': '580'}, {'saham': 'WOOD', 'harga': '575'}, {'saham': 'ADMF', 'harga': '8775'}, {'saham': 'ABDA', 'harga': '5750'}, {'saham': 'AGRS', 'harga': '164'}, {'saham': 'AHAP', 'harga': '57'}, {'saham': 'AMAG', 'harga': '232'}, {'saham': 'APIC', 'harga': '775'}, {'saham': 'ARTO', 'harga': '3900'}, {'saham': 'ASBI', 'harga': '310'}, {'saham': 'ASDM', 'harga': '900'}, {'saham': 'ASJT', 'harga': '210'}, {'saham': 'ASMI', 'harga': '970'}, {'saham': 'ASRM', 'harga': '1680'}, {'saham': 'BABP', 'harga': '50'}, {'saham': 'BACA', 'harga': '384'}, {'saham': 'BBHI', 'harga': '384'}, {'saham': 'BBKP', 'harga': '490'}, {'saham': 'BBLD', 'harga': '364'}, {'saham': 'BBMD', 'harga': '1450'}, {'saham': 'BBYB', 'harga': '300'}, {'saham': 'BCAP', 'harga': '129'}, {'saham': 'BCIC', 'harga': '700'}, {'saham': 'BFIN', 'harga': '426'}, {'saham': 'BGTG', 'harga': '69'}, {'saham': 'BINA', 'harga': '680'}, {'saham': 'BKSW', 'harga': '106'}, {'saham': 'BMAS', 'harga': '328'}, {'saham': 'BNBA', 'harga': '388'}, {'saham': 'BPFI', 'harga': '1150'}, {'saham': 'BPII', 'harga': '10000'}, {'saham': 'BRIS', 'harga': '2290'}, {'saham': 'BSIM', 'harga': '452'}, {'saham': 'BSWD', 'harga': '1750'}, {'saham': 'BTPN', 'harga': '3300'}, {'saham': 'BTPS', 'harga': '3900'}, {'saham': 'BVIC', 'harga': '113'}, {'saham': 'CFIN', 'harga': '236'}, {'saham': 'DEFI', 'harga': '1685'}, {'saham': 'DNAR', 'harga': '181'}, {'saham': 'FINN', 'harga': '50'}, {'saham': 'GSMF', 'harga': '94'}, {'saham': 'HADE', 'harga': '50'}, {'saham': 'HDFA', 'harga': 
-'123'}, {'saham': 'IBFN', 'harga': '276'}, {'saham': 'IMJS', 'harga': '438'}, {'saham': 'INPC', 'harga': '66'}, {'saham': 'JMAS', 'harga': '187'}, {'saham': 'LPGI', 'harga': '3500'}, {'saham': 'LPPS', 'harga': '82'}, {'saham': 'MAYA', 'harga': '8700'}, {'saham': 'MEGA', 'harga': '7000'}, {'saham': 'MFIN', 'harga': '1010'}, {'saham': 'MGNA', 'harga': '50'}, {'saham': 'MREI', 'harga': '4550'},
-{'saham': 'ICBP', 'harga': '9700'}, {'saham': 'KLBF', 'harga': '1540'}, {'saham': 'INDF', 'harga': '6825'}, {'saham': 'BBCA', 'harga': '34000'}, {'saham': 'BBNI', 'harga': '6650'}, {'saham': 'BBRI', 'harga': '4280'}, {'saham': 'BBTN', 'harga': '1940'}, {'saham': 'BMRI', 'harga': '6700'}, {'saham': 'JSMR', 'harga': '4710'}, {'saham': 'PGAS', 'harga': '1790'}, {'saham': 'TLKM', 'harga': '3510'}, {'saham': 
-'ANTM', 'harga': '1950'}, {'saham': 'SRIL', 'harga': '284'}, {'saham': 'BSDE', 'harga': '1300'}, {'saham': 'PTPP', 'harga': '1770'}, {'saham': 'WSKT', 'harga': '1500'}, {'saham': 'LPKR', 'harga': '244'}, {'saham': 'PWON', 'harga': '575'}, {'saham': 'LPPF', 'harga': '1420'}, {'saham': 'BMTR', 'harga': '314'}, {'saham': 'TPIA', 'harga': '9075'}, {'saham': 'WSBP', 'harga': '272'}, {'saham': 'BJBR', 'harga': '1655'}, {'saham': 'EXCL', 'harga': '2790'}, {'saham': 'INDY', 'harga': '1880'}, {'saham': 'TRAM', 'harga': '50'}, {'saham': 'INCO', 'harga': '5375'}, {'saham': 'PTBA', 'harga': '2980'}, {'saham': 'ADHI', 'harga': '1650'}, {'saham': 'MYRX', 'harga': '50'}, {'saham': 'AKRA', 'harga': '3370'}, {'saham': 'SCMA', 'harga': '2150'}, {'saham': 'MPPA', 'harga': '115'}, {'saham': 'SILO', 'harga': '5525'}, {'saham': 'DSFI', 'harga': '75'}, {'saham': 'DSNG', 'harga': '630'}, {'saham': 'SIMP', 'harga': '416'}, {'saham': 'EKAD', 'harga': '1275'}, {'saham': 'MARK', 'harga': '770'}, {'saham': 'SMCB', 'harga': '1350'}, {'saham': 'KINO', 'harga': '2820'}, {'saham': 'SIDO', 'harga': '780'}, {'saham': 'BNII', 'harga': '286'}, {'saham': 'CASA', 'harga': '384'}, {'saham': 'PNLF', 'harga': '264'}, {'saham': 'BIRD', 'harga': '1520'}, {'saham': 'GIAA', 'harga': '454'}, {'saham': 'META', 'harga': '169'}, {'saham': 'SOCI', 'harga': '300'}, {'saham': 'ENRG', 'harga': '117'}, {'saham': 'PTRO', 'harga': '2100'}, {'saham': 'SMRU', 'harga': '50'}, {'saham': 'ADMG', 'harga': '157'}, {'saham': 'INDS', 'harga': '1930'}, {'saham': 'PTSN', 'harga': '240'}, {'saham': 'MDLN', 'harga': '51'}, {'saham': 'BCIP', 'harga': '74'}, {'saham': 'DILD', 'harga': '228'}, {'saham': 'KIJA', 'harga': '230'}, {'saham': 'LCGP', 'harga': '114'}, {'saham': 'LPCK', 'harga': '1545'}, {'saham': 'NIRO', 'harga': '152'}, {'saham': 'TOPS', 'harga': '0'}, {'saham': 'TOTL', 'harga': '404'}, {'saham': 'DPUM', 'harga': '53'}, {'saham': 'ERAA', 'harga': '2060'}, {'saham': 'LTLS', 'harga': '490'}, {'saham': 'MINA', 'harga': '50'}, {'saham': 'OKAS', 'harga': '114'}, {'saham': 'PLAS', 'harga': '50'}, {'saham': 'SUGI', 'harga': '50'}, {'saham': 'TELE', 'harga': '121'}, {'saham': 'VIVA', 'harga': '53'}, {'saham': 'AALI', 'harga': '12075'}, {'saham': 'BWPT', 'harga': '143'}, {'saham': 'LSIP', 'harga': '1270'}, {'saham': 'INKP', 'harga': '10400'}, {'saham': 'CPIN', 'harga': '6600'}, {'saham': 'JPFA', 'harga': '1635'}, {'saham': 'KRAS', 'harga': '464'}, {'saham': 'NIKL', 'harga': '1750'}, {'saham': 'SMBR', 'harga': '1295'}, {'saham': 'WTON', 'harga': '430'}, {'saham': 'MYOR', 'harga': '2740'}, {'saham': 'AISA', 'harga': '416'}, {'saham': 'INAF', 'harga': '4160'}, {'saham': 'KAEF', 'harga': '4280'}, {'saham': 'BDMN', 'harga': '3340'}, {'saham': 'BNGA', 'harga': '1065'}, {'saham': 'PNBN', 'harga': '1165'}, {'saham': 'AGRO', 'harga': '1035'}, {'saham': 'BEKS', 'harga': '102'}, {'saham': 'BJTM', 'harga': '725'}, {'saham': 'BNLI', 'harga': '2660'}, {'saham': 'KREN', 'harga': '85'}, {'saham': 'MCOR', 'harga': '137'}, {'saham': 'ISAT', 'harga': '4560'}, {'saham': 'LEAD', 'harga': '50'}, {'saham': 'TBIG', 'harga': '1485'}, {'saham': 'MEDC', 'harga': '665'}, {'saham': 'ELSA', 'harga': '380'}, {'saham': 'ITMG', 'harga': '14875'}, {'saham': 'TINS', 'harga': '1605'}, {'saham': 'BIPI', 'harga': '50'}, {'saham': 'DOID', 'harga': '412'}, {'saham': 'HRUM', 'harga': '3220'}, {'saham': 'GJTL', 'harga': '620'}, {'saham': 'KBLI', 'harga': '406'}, {'saham': 'PBRX', 'harga': '262'}, {'saham': 'PPRO', 
-'harga': '0'}, {'saham': 'SMRA', 'harga': '895'}, {'saham': 'ASRI', 'harga': '278'}, {'saham': 'BEST', 'harga': '204'}, {'saham': 'CTRA', 'harga': '1070'}, {'saham': 'DMAS', 'harga': '250'}, {'saham': 'SSIA', 'harga': '580'}, {'saham': 'TARA', 'harga': '50'}, {'saham': 'MAPI', 'harga': '920'}, {'saham': 'ACES', 'harga': '1850'}, {'saham': 'BHIT', 'harga': '73'}, {'saham': 'BRMS', 'harga': '88'}, {'saham': 'LINK', 'harga': '2670'}, {'saham': 'MIKA', 'harga': '2680'}, {'saham': 'MLPL', 'harga': '73'}, {'saham': 'POOL', 'harga': '50'}, {'saham': 'RALS', 'harga': '890'}, {'saham': 'ANJT', 'harga': '690'}, {'saham': 'BISI', 'harga': '1080'}, {'saham': 'BTEK', 'harga': '50'}, {'saham': 'GOLL', 'harga': '50'}, {'saham': 'GZCO', 'harga': '50'}, {'saham': 'IIKP', 'harga': '50'}, {'saham': 'JAWA', 'harga': '96'}, {'saham': 'KMTR', 'harga': '350'}, {'saham': 'MAGP', 'harga': '0'}, {'saham': 'MGRO', 'harga': '765'}, {'saham': 'PALM', 'harga': '324'}, {'saham': 'PCAR', 'harga': '815'}, {'saham': 'SGRO', 'harga': '1710'}, {'saham': 'SMAR', 'harga': '3950'}, {'saham': 'TBLA', 'harga': '830'}, {'saham': 'UNSP', 'harga': '117'}, {'saham': 'AKPI', 'harga': '510'}, {'saham': 'ALDO', 'harga': '400'}, {'saham': 'ALKA', 'harga': '272'}, {'saham': 'ALMI', 'harga': '260'}, {'saham': 'AMFG', 'harga': '2910'}, {'saham': 'APLI', 'harga': '183'}, {'saham': 'BAJA', 'harga': '133'}, {'saham': 'BRNA', 'harga': '1125'}, {'saham': 'BTON', 'harga': '286'}, {'saham': 'BUDI', 'harga': '97'}, {'saham': 'CTBN', 'harga': '2800'}, {'saham': 'DPNS', 'harga': '250'}, {'saham': 'ETWA', 'harga': '62'}, {'saham': 'FASW', 'harga': '7475'}, {'saham': 
-'FPNI', 'harga': '156'}, {'saham': 'GDST', 'harga': '122'}, {'saham': 'IGAR', 'harga': '352'}, {'saham': 'INAI', 'harga': '334'}, {'saham': 'INCF', 'harga': '73'}, {'saham': 'INCI', 'harga': '825'}, {'saham': 'INRU', 'harga': '885'}, {'saham': 'IPOL', 'harga': '93'}, {'saham': 'ISSP', 'harga': '175'}, {'saham': 'JKSW', 'harga': '60'}, {'saham': 'JPRS', 'harga': '0'}, {'saham': 'KBRI', 'harga': '50'}, {'saham': 'MAIN', 'harga': '840'}, {'saham': 'MDKI', 'harga': '238'}, {'saham': 'MLIA', 'harga': '530'}, {'saham': 'PBID', 'harga': '1330'}, {'saham': 'PICO', 'harga': '143'}, {'saham': 'SIPD', 'harga': '1250'}, {'saham': 'SPMA', 'harga': '316'}, {'saham': 'SRSN', 'harga': '61'}, {'saham': 'SULI', 'harga': '50'}, {'saham': 'TALF', 'harga': '314'}, {'saham': 'TBMS', 'harga': '940'}, {'saham': 'TDPM', 'harga': 
-'150'}, {'saham': 'TIRT', 'harga': '50'}, {'saham': 'TRST', 'harga': '400'}, {'saham': 'UNIC', 'harga': '4910'}, {'saham': 'YPAS', 'harga': '438'}, {'saham': 'SWAT', 'harga': '114'}, {'saham': 'ROTI', 'harga': '1335'}, {'saham': 'ADES', 'harga': '1560'}, {'saham': 'ALTO', 'harga': '308'}, {'saham': 'CAMP', 'harga': '330'}, {'saham': 'CEKA', 'harga': '1795'}, {'saham': 'CINT', 'harga': '242'}, {'saham': 'CLEO', 'harga': '580'}, {'saham': 'DLTA', 'harga': '4280'}, {'saham': 'KDSI', 'harga': '870'}, {'saham': 'KIAS', 'harga': '52'}, {'saham': 'LION', 'harga': '364'}, {'saham': 'LMSH', 'harga': '460'}, {'saham': 'DVLA', 'harga': '2490'}, {'saham': 'HOKI', 'harga': '1090'}, {'saham': 'HRTA', 'harga': '272'}, {'saham': 'KICI', 'harga': '250'}, {'saham': 'LMPI', 'harga': '84'}, {'saham': 'MOLI', 'harga': '845'}, {'saham': 'MBTO', 'harga': '94'}, {'saham': 'MERK', 'harga': '3280'}, {'saham': 'MLBI', 'harga': '10000'}, {'saham': 'MRAT', 'harga': '153'}, {'saham': 'PSDN', 'harga': '121'}, {'saham': 'PYFA', 'harga': '1020'}, {'saham': 'RMBA', 'harga': '362'}, {'saham': 'SCPI', 'harga': '29000'}, {'saham': 'SKBM', 'harga': '338'}, {'saham': 'SKLT', 'harga': '1585'}, {'saham': 'STTP', 'harga': '9000'}, {'saham': 'TCID', 'harga': '6700'}, {'saham': 'TSPC', 'harga': '1395'}, {'saham': 'ULTJ', 'harga': '1660'}, {'saham': 'WIIM', 'harga': '580'}, {'saham': 'WOOD', 'harga': '575'}, {'saham': 'ADMF', 'harga': '8775'}, {'saham': 'ABDA', 'harga': '5750'}, {'saham': 'AGRS', 'harga': '164'}, {'saham': 'AHAP', 'harga': '57'}, {'saham': 'AMAG', 'harga': '232'}, {'saham': 'APIC', 'harga': '775'}, {'saham': 'ARTO', 'harga': '3900'}, {'saham': 'ASBI', 'harga': '310'}, {'saham': 'ASDM', 'harga': '900'}, {'saham': 'ASJT', 'harga': '210'}, {'saham': 'ASMI', 'harga': '970'}, {'saham': 'ASRM', 'harga': '1680'}, {'saham': 'BABP', 'harga': '50'}, {'saham': 'BACA', 'harga': '384'}, {'saham': 'BBHI', 'harga': '384'}, {'saham': 'BBKP', 'harga': '490'}, {'saham': 'BBLD', 'harga': '364'}, {'saham': 'BBMD', 'harga': '1450'}, {'saham': 'BBYB', 'harga': '300'}, {'saham': 'BCAP', 'harga': '129'}, {'saham': 'BCIC', 'harga': '700'}, {'saham': 'BFIN', 'harga': '426'}, {'saham': 'BGTG', 'harga': '69'}, {'saham': 'BINA', 'harga': '680'}, {'saham': 'BKSW', 'harga': '106'}, {'saham': 'BMAS', 'harga': '328'}, {'saham': 'BNBA', 'harga': '388'}, {'saham': 'BPFI', 'harga': '1150'}, {'saham': 'BPII', 'harga': '10000'}, {'saham': 'BRIS', 'harga': '2290'}, {'saham': 'BSIM', 'harga': '452'}, {'saham': 'BSWD', 'harga': '1750'}, {'saham': 'BTPN', 'harga': '3300'}, {'saham': 'BTPS', 'harga': '3900'}, {'saham': 'BVIC', 'harga': '113'}, {'saham': 'CFIN', 'harga': '236'}, {'saham': 'DEFI', 'harga': '1685'}, {'saham': 'DNAR', 'harga': '181'}, {'saham': 'FINN', 'harga': '50'}, {'saham': 'GSMF', 'harga': '94'}, {'saham': 'HADE', 'harga': '50'}, {'saham': 'HDFA', 'harga': 
-'123'}, {'saham': 'IBFN', 'harga': '276'}, {'saham': 'IMJS', 'harga': '438'}, {'saham': 'INPC', 'harga': '66'}, {'saham': 'JMAS', 'harga': '187'}, {'saham': 'LPGI', 'harga': '3500'}, {'saham': 'LPPS', 'harga': '82'}, {'saham': 'MAYA', 'harga': '8700'}, {'saham': 'MEGA', 'harga': '7000'}, {'saham': 'MFIN', 'harga': '1010'}, {'saham': 'MGNA', 'harga': '50'}, {'saham': 'MREI', 'harga': '4550'}, {'saham': 'MTWI', 'harga': '63'}]
-[{'saham': 'ICBP', 'harga': '9700'}, {'saham': 'KLBF', 'harga': '1540'}, {'saham': 'INDF', 'harga': '6825'}, {'saham': 'BBCA', 'harga': '34000'}, {'saham': 'BBNI', 'harga': '6650'}, {'saham': 'BBRI', 'harga': '4280'}, {'saham': 'BBTN', 'harga': '1940'}, {'saham': 'BMRI', 'harga': '6700'}, {'saham': 'JSMR', 'harga': '4710'}, {'saham': 'PGAS', 'harga': '1790'}, {'saham': 'TLKM', 'harga': '3510'}, {'saham': 
-'ANTM', 'harga': '1950'}, {'saham': 'SRIL', 'harga': '284'}, {'saham': 'BSDE', 'harga': '1300'}, {'saham': 'PTPP', 'harga': '1770'}, {'saham': 'WSKT', 'harga': '1500'}, {'saham': 'LPKR', 'harga': '244'},{'saham': 'PWON', 'harga': '575'}, {'saham': 'LPPF', 'harga': '1420'}, {'saham': 'BMTR', 'harga': '314'}, {'saham': 'TPIA', 'harga': '9075'}, {'saham': 'WSBP', 'harga': '272'}, {'saham': 'BJBR', 'harga': 
-'1655'}, {'saham': 'EXCL', 'harga': '2790'}, {'saham': 'INDY', 'harga': '1880'}, {'saham': 'TRAM', 'harga': '50'}, {'saham': 'INCO', 'harga': '5375'}, {'saham': 'PTBA', 'harga': '2980'}, {'saham': 'ADHI', 'harga': '1650'}, {'saham': 'MYRX', 'harga': '50'}, {'saham': 'AKRA', 'harga': '3370'}, {'saham': 'SCMA', 'harga': '2150'}, {'saham': 'MPPA', 'harga': '115'}, {'saham': 'SILO', 'harga': '5525'}, {'saham': 'DSFI', 'harga': '75'}, {'saham': 'DSNG', 'harga': '630'}, {'saham': 'SIMP', 'harga': '416'}, {'saham': 'EKAD', 'harga': '1275'}, {'saham': 'MARK', 'harga': '770'}, {'saham': 'SMCB', 'harga': '1350'}, {'saham': 'KINO', 'harga': '2820'}, {'saham': 'SIDO', 'harga': '780'}, {'saham': 'BNII', 'harga': '286'}, {'saham': 'CASA', 'harga': '384'}, {'saham': 'PNLF', 'harga': '264'}, {'saham': 'BIRD', 'harga': '1520'}, {'saham': 'GIAA', 'harga': '454'}, {'saham': 'META', 'harga': '169'}, {'saham': 'SOCI', 'harga': '300'}, {'saham': 'ENRG', 'harga': '117'}, {'saham': 'PTRO', 'harga': '2100'}, {'saham': 'SMRU', 'harga': '50'}, {'saham': 'ADMG', 'harga': '157'}, {'saham': 'INDS', 'harga': '1930'}, {'saham': 'PTSN', 'harga': '240'}, {'saham': 'MDLN', 'harga': '51'}, {'saham': 'BCIP', 'harga': '74'}, {'saham': 'DILD', 'harga': '228'}, {'saham': 'KIJA', 'harga': '230'}, {'saham': 'LCGP', 'harga': '114'}, {'saham': 'LPCK', 'harga': '1545'}, {'saham': 'NIRO', 'harga': '152'}, {'saham': 'TOPS', 'harga': '0'}, {'saham': 'TOTL', 'harga': '404'}, {'saham': 'DPUM', 'harga': '53'}, {'saham': 'ERAA', 'harga': '2060'}, {'saham': 'LTLS', 'harga': '490'}, {'saham': 'MINA', 'harga': '50'}, {'saham': 'OKAS', 'harga': '114'}, {'saham': 'PLAS', 'harga': '50'}, {'saham': 'SUGI', 'harga': '50'}, {'saham': 'TELE', 'harga': '121'}, {'saham': 'VIVA', 'harga': '53'}, {'saham': 'AALI', 'harga': '12075'}, {'saham': 'BWPT', 'harga': '143'}, {'saham': 'LSIP', 'harga': '1270'}, {'saham': 'INKP', 'harga': '10400'}, {'saham': 'CPIN', 'harga': '6600'}, {'saham': 'JPFA', 'harga': '1635'}, {'saham': 'KRAS', 'harga': '464'}, {'saham': 'NIKL', 'harga': '1750'}, {'saham': 'SMBR', 'harga': '1295'}, {'saham': 'WTON', 'harga': '430'}, {'saham': 'MYOR', 'harga': '2740'}, {'saham': 'AISA', 'harga': '416'}, {'saham': 'INAF', 'harga': '4160'}, {'saham': 'KAEF', 'harga': '4280'}, {'saham': 'BDMN', 'harga': '3340'}, {'saham': 'BNGA', 'harga': '1065'}, {'saham': 'PNBN', 'harga': '1165'}, {'saham': 'AGRO', 'harga': '1035'}, {'saham': 'BEKS', 'harga': '102'}, {'saham': 'BJTM', 'harga': '725'}, {'saham': 'BNLI', 'harga': '2660'}, {'saham': 'KREN', 'harga': '85'}, {'saham': 'MCOR', 'harga': '137'}, {'saham': 'ISAT', 'harga': '4560'}, {'saham': 'LEAD', 'harga': '50'}, {'saham': 'TBIG', 'harga': '1485'}, {'saham': 'MEDC', 'harga': '665'}, {'saham': 'ELSA', 'harga': '380'}, {'saham': 'ITMG', 'harga': '14875'}, {'saham': 'TINS', 'harga': '1605'}, {'saham': 'BIPI', 'harga': '50'}, {'saham': 'DOID', 'harga': '412'}, {'saham': 'HRUM', 'harga': '3220'}, {'saham': 'GJTL', 'harga': '620'}, {'saham': 'KBLI', 'harga': '406'}, {'saham': 'PBRX', 'harga': '262'}, {'saham': 'PPRO', 
-'harga': '0'}, {'saham': 'SMRA', 'harga': '895'}, {'saham': 'ASRI', 'harga': '278'}, {'saham': 'BEST', 'harga': '204'}, {'saham': 'CTRA', 'harga': '1070'}, {'saham': 'DMAS', 'harga': '250'}, {'saham': 'SSIA', 'harga': '580'}, {'saham': 'TARA', 'harga': '50'}, {'saham': 'MAPI', 'harga': '920'}, {'saham': 'ACES', 'harga': '1850'}, {'saham': 'BHIT', 'harga': '73'}, {'saham': 'BRMS', 'harga': '88'}, {'saham': 'LINK', 'harga': '2670'}, {'saham': 'MIKA', 'harga': '2680'}, {'saham': 'MLPL', 'harga': '73'}, {'saham': 'POOL', 'harga': '50'}, {'saham': 'RALS', 'harga': '890'}, {'saham': 'ANJT', 'harga': '690'}, {'saham': 'BISI', 'harga': '1080'}, {'saham': 'BTEK', 'harga': '50'}, {'saham': 'GOLL', 'harga': '50'}, {'saham': 'GZCO', 'harga': '50'}, {'saham': 'IIKP', 'harga': '50'}, {'saham': 'JAWA', 'harga': '96'}, {'saham': 'KMTR', 'harga': '350'}, {'saham': 'MAGP', 'harga': '0'}, {'saham': 'MGRO', 'harga': '765'}, {'saham': 'PALM', 'harga': '324'}, {'saham': 'PCAR', 'harga': '815'}, {'saham': 'SGRO', 'harga': '1710'}, {'saham': 'SMAR', 'harga': '3950'}, {'saham': 'TBLA', 'harga': '830'}, {'saham': 'UNSP', 'harga': '117'}, {'saham': 'AKPI', 'harga': '510'}, {'saham': 'ALDO', 'harga': '400'}, {'saham': 'ALKA', 'harga': '272'}, {'saham': 'ALMI', 'harga': '260'}, {'saham': 'AMFG', 'harga': '2910'}, {'saham': 'APLI', 'harga': '183'}, {'saham': 'BAJA', 'harga': '133'}, {'saham': 'BRNA', 'harga': '1125'}, {'saham': 'BTON', 'harga': '286'}, {'saham': 'BUDI', 'harga': '97'}, {'saham': 'CTBN', 'harga': '2800'}, {'saham': 'DPNS', 'harga': '250'}, {'saham': 'ETWA', 'harga': '62'}, {'saham': 'FASW', 'harga': '7475'}, {'saham': 
-'FPNI', 'harga': '156'}, {'saham': 'GDST', 'harga': '122'}, {'saham': 'IGAR', 'harga': '352'}, {'saham': 'INAI', 'harga': '334'}, {'saham': 'INCF', 'harga': '73'}, {'saham': 'INCI', 'harga': '825'}, {'saham': 'INRU', 'harga': '885'}, {'saham': 'IPOL', 'harga': '93'}, {'saham': 'ISSP', 'harga': '175'}, {'saham': 'JKSW', 'harga': '60'}, {'saham': 'JPRS', 'harga': '0'}, {'saham': 'KBRI', 'harga': '50'}, {'saham': 'MAIN', 'harga': '840'}, {'saham': 'MDKI', 'harga': '238'}, {'saham': 'MLIA', 'harga': '530'}, {'saham': 'PBID', 'harga': '1330'}, {'saham': 'PICO', 'harga': '143'}, {'saham': 'SIPD', 'harga': '1250'}, {'saham': 'SPMA', 'harga': '316'}, {'saham': 'SRSN', 'harga': '61'}, {'saham': 'SULI', 'harga': '50'}, {'saham': 'TALF', 'harga': '314'}, {'saham': 'TBMS', 'harga': '940'}, {'saham': 'TDPM', 'harga': 
-'150'}, {'saham': 'TIRT', 'harga': '50'}, {'saham': 'TRST', 'harga': '400'}, {'saham': 'UNIC', 'harga': '4910'}, {'saham': 'YPAS', 'harga': '438'}, {'saham': 'SWAT', 'harga': '114'}, {'saham': 'ROTI', 'harga': '1335'}, {'saham': 'ADES', 'harga': '1560'}, {'saham': 'ALTO', 'harga': '308'}, {'saham': 'CAMP', 'harga': '330'}, {'saham': 'CEKA', 'harga': '1795'}, {'saham': 'CINT', 'harga': '242'}, {'saham': 'CLEO', 'harga': '580'}, {'saham': 'DLTA', 'harga': '4280'}, {'saham': 'KDSI', 'harga': '870'}, {'saham': 'KIAS', 'harga': '52'}, {'saham': 'LION', 'harga': '364'}, {'saham': 'LMSH', 'harga': '460'}, {'saham': 'DVLA', 'harga': '2490'}, {'saham': 'HOKI', 'harga': '1090'}, {'saham': 'HRTA', 'harga': '272'}, {'saham': 'KICI', 'harga': '250'}, {'saham': 'LMPI', 'harga': '84'}, {'saham': 'MOLI', 'harga': '845'}, {'saham': 'MBTO', 'harga': '94'}, {'saham': 'MERK', 'harga': '3280'}, {'saham': 'MLBI', 'harga': '10000'}, {'saham': 'MRAT', 'harga': '153'}, {'saham': 'PSDN', 'harga': '121'}, {'saham': 'PYFA', 'harga': '1020'}, {'saham': 'RMBA', 'harga': '362'}, {'saham': 'SCPI', 'harga': '29000'}, {'saham': 'SKBM', 'harga': '338'}, {'saham': 'SKLT', 'harga': '1585'}, {'saham': 'STTP', 'harga': '9000'}, {'saham': 'TCID', 'harga': '6700'}, {'saham': 'TSPC', 'harga': '1395'}, {'saham': 'ULTJ', 'harga': '1660'}, {'saham': 'WIIM', 'harga': '580'}, {'saham': 'WOOD', 'harga': '575'}, {'saham': 'ADMF', 'harga': '8775'}, {'saham': 'ABDA', 'harga': '5750'}, {'saham': 'AGRS', 'harga': '164'}, {'saham': 'AHAP', 'harga': '57'}, {'saham': 'AMAG', 'harga': '232'}, {'saham': 'APIC', 'harga': '775'}, {'saham': 'ARTO', 'harga': '3900'}, {'saham': 'ASBI', 'harga': '310'}, {'saham': 'ASDM', 'harga': '900'}, {'saham': 'ASJT', 'harga': '210'}, {'saham': 'ASMI', 'harga': '970'}, {'saham': 'ASRM', 'harga': '1680'}, {'saham': 'BABP', 'harga': '50'}, {'saham': 'BACA', 'harga': '384'}, {'saham': 'BBHI', 'harga': '384'}, {'saham': 'BBKP', 'harga': '490'}, {'saham': 'BBLD', 'harga': '364'}, {'saham': 'BBMD', 'harga': '1450'}, {'saham': 'BBYB', 'harga': '300'}, {'saham': 'BCAP', 'harga': '129'}, {'saham': 'BCIC', 'harga': '700'}, {'saham': 'BFIN', 'harga': '426'}, {'saham': 'BGTG', 'harga': '69'}, {'saham': 'BINA', 'harga': '680'}, {'saham': 'BKSW', 'harga': '106'}, {'saham': 'BMAS', 'harga': '328'}, {'saham': 'BNBA', 'harga': '388'}, {'saham': 'BPFI', 'harga': '1150'}, {'saham': 'BPII', 'harga': '10000'}, {'saham': 'BRIS', 'harga': '2290'}, {'saham': 'BSIM', 'harga': '452'}, {'saham': 'BSWD', 'harga': '1750'}, {'saham': 'BTPN', 'harga': '3300'}, {'saham': 'BTPS', 'harga': '3900'}, {'saham': 'BVIC', 'harga': '113'}, {'saham': 'CFIN', 'harga': '236'}, {'saham': 'DEFI', 'harga': '1685'}, {'saham': 'DNAR', 'harga': '181'}, {'saham': 'FINN', 'harga': '50'}, {'saham': 'GSMF', 'harga': '94'}, {'saham': 'HADE', 'harga': '50'}, {'saham': 'HDFA', 'harga': 
-'123'}, {'saham': 'IBFN', 'harga': '276'}, {'saham': 'IMJS', 'harga': '438'}, {'saham': 'INPC', 'harga': '66'}, {'saham': 'JMAS', 'harga': '187'}, {'saham': 'LPGI', 'harga': '3500'}, {'saham': 'LPPS', 'harga': '82'}, {'saham': 'MAYA', 'harga': '8700'}, {'saham': 'MEGA', 'harga': '7000'}, {'saham': 'MFIN', 'harga': '1010'}, {'saham': 'MGNA', 'harga': '50'}, {'saham': 'MREI', 'harga': '4550'}, {'saham': 'MTWI', 'harga': '63'},
-{'saham': 'IKAI', 'harga': '50'}, {'saham': 'IMPC', 'harga': '1340'}, {'saham': 'TOTO', 'harga': '250'}, {'saham': 'SSMS', 'harga': '1065'}, {'saham': 'SMGR', 'harga': '12550'}, {'saham': 'GGRM', 'harga': '42025'}, {'saham': 'HMSP', 'harga': '1570'},{'saham': 'NICK', 'harga': '290'}, {'saham': 'NISP', 'harga': '815'}, {'saham': 'NOBU', 'harga': '770'}, {'saham': 'OCAP', 'harga': '159'}, {'saham': 'PADI', 'harga': '50'}, 
-{'saham': 'PANS', 'harga': '1065'}, {'saham': 'PEGE', 'harga': '118'}, {'saham': 'PNBS', 'harga': '82'}, {'saham': 'PNIN', 'harga': '910'}, {'saham': 'RELI', 'harga': '314'}, {'saham': 'SDRA', 'harga': '785'}, {'saham': 'SMMA', 'harga': '11750'}, {'saham': 'TIFA', 'harga': '510'}, {'saham': 'TRIM', 'harga': '102'}, {'saham': 'TRUS', 'harga': '350'}, {'saham': 'TUGU', 'harga': '1885'}, {'saham': 'VICO', 'harga': '76'}, {'saham': 'VINS', 'harga': '92'}, {'saham': 'VRNA', 'harga': '104'}, {'saham': 'WOMF', 'harga': '256'}, {'saham': 'YULE', 'harga': '340'}, {'saham': 'ASSA', 'harga': '625'}, {'saham': 'BALI', 'harga': '850'}, {'saham': 
-'BBRM', 'harga': '50'}, {'saham': 'BPTR', 'harga': '82'}, {'saham': 'BUKK', 'harga': '905'},  {'saham': 'CASS', 'harga': '292'}, {'saham': 'CMNP', 'harga': '1250'}]
-
-emiten_bermasalah=['KPAL','BLTA']
-
-emiten_code_bumn=['INPC','ABBA','BMRI','JSMR','PGAS','ANTM','KRAS','GIAA','IPCC','WSKT','ANTM']
-
-#TODO: eliminasi emiten bermasalah dari populasi emiten saham
-
-emiten_saham = emiten_code_bumn if testing == True else [ o['saham'] for o in[o for o in populasi if int(o['harga']) > 60]] 
-#!xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
 def telegram_bot_sendtext(bot_message):
 
 	bot_token   = '1035682714:AAGea_Lk2ZH3X6BHJt3xAudQDSn5RHwYQJM'
@@ -102,37 +61,6 @@ def telegram_bot_sendtext(bot_message):
 
 	return response.json()
 
-def  step_fr_buy_to_sell (laba,harga) : #!--> integer
-
-	'''
-		Menghitung banyaknya langkah yang diperlukan sejak beli sampai dengan jual saham
-		dengan cara membagi laba dengan fraksi saham/Tick
-						 
-		 Returns:           
-			 jumlah langkah dalam integer
-
-	'''
-    
-	fraksi = 0
-
-	if harga < 200:
-		fraksi = 1
-        
-	elif harga < 500:
-		fraksi = 2
-        
-	elif harga < 2000:
-		fraksi = 5
-        
-	elif harga < 5000:
-		fraksi = 10
-        
-	else:
-		fraksi = 25
-
-	step= laba / fraksi
-
-	return int(step)
 
 
 #TODO: Logger
@@ -158,267 +86,381 @@ def get_logger( name, log_level ):
 
 
 #TODO: restart
+	"""
+	restart program
 
+	"""
 def restart_program():
 
 	python = sys.executable
 	os.execl(python, python, * sys.argv)
 
+
+# Jangan proses kalau sabtu/minggu (menyesuaikan dengan waktu UTC)
+waktu=datetime.today() #mendapatkan waktu saat ini
+waktu_kerja_jakarta=  int((waktu + (timedelta(hours = 7))).strftime('%w'))
+waktu_kerja_jakarta =6
+
+if testing == False and waktu_kerja_jakarta > 5:
+    my_message=  'Sabtu/Minggu, no data'
+    (telegram_bot_sendtext(my_message)	    )
+    x=5/0
+
 my_message=  'Mulai penarikan data'
 (telegram_bot_sendtext(my_message)	    ) 
+
+
+#class OrderBook(object):  
+
+ #   def __init__(self, monitor=True, output=True):
+    
+  #      self.logger = None        
+   #     self.monitor = monitor
+    #    self.output = output or monitor
+
+def  step_fr_buy_to_sell (laba,harga) : #!--> integer
+
+    '''
+        Menghitung banyaknya jarak yang diperlukan sejak beli sampai dengan jual saham
+        dengan cara membagi laba dengan fraksi saham/Tick
+                        
+        Returns:           
+            jarak dalam integer
+
+    '''
+    
+    fraksi = 0
+
+    if harga < 200:
+        fraksi = 1
+        
+    elif harga < 500:
+        fraksi = 2
+        
+    elif harga < 2000:
+        fraksi = 5
+        
+    elif harga < 5000:
+        fraksi = 10
+        
+    else:
+        fraksi = 25
+
+    jarak= laba / fraksi
+
+    return int(jarak)
 
 @lru_cache(maxsize=None)
 def ekstraksi_data():  #!--> list
 
-	'''
-		Mengekstrak data order book dari website IPOT 
-		
-		+ Orderbook yang sudah didapat kemudian diseleksi berdasarkan kriteria seperti potensi laba, jarak beli ke jual, harga saham, dst
-				 
-		 Returns:           
-			 list saham yang punya potensi dengan usulan harga beli, jual dan jarak
-	'''
+    '''
+        Mengekstrak data order book dari website IPOT 
+        
+        + Orderbook yang sudah didapat kemudian diseleksi berdasarkan kriteria seperti potensi laba, jarak beli ke jual, harga saham, dst
+                
+        Returns:           
+            list saham yang punya potensi dengan usulan harga beli, jual dan jarak
+    '''
 
-	# modul perekayasa data
-	import pandas as pd
+    # modul perekayasa data
+    import pandas as pd
 
-	
-	#! menyiapkan penampungan untuk hasil saham terplih
-	result = []	
+    populasi=data_emiten.data_emiten()
+    emiten_harga_gocap=[ o['saham'] for o in[o for o in populasi if int(o['mid_prc']) < 60]] 
+    populasi= [ o['saham'] for o in[o for o in populasi ]]
+    emiten_bermasalah=list(['KPAL','BLTA'] + emiten_harga_gocap)
+    print('emiten_bermasalah',emiten_bermasalah,len(emiten_bermasalah))
+    emiten_code_bumn=['WEHA','INPC','ABBA','KPAL','BLTA']#,'BMRI','JSMR','PGAS','ANTM','KRAS','GIAA','IPCC','WSKT','ANTM']
+#	emiten_code_bumn = [o for o in emiten_code_bumn if o not in emiten_bermasalah]
+    emiten_saham = emiten_code_bumn if testing == True else [o for o in populasi if o not in emiten_bermasalah]
+#https://stackoverflow.com/questions/50665276/appending-dataframe-data-to-a-json-file-without-deleting-previous-content
+    
+    #! menyiapkan penampungan untuk hasil saham terplih
+    result = []	
 
-	#! untuk setiap emiten terpilih dari populasi:
-	for emiten in emiten_saham:	
+    #! untuk setiap emiten terpilih dari populasi:
+    for emiten in populasi:	
 
-		#! endpoint alamat order book IPOT
-		print(emiten)
-		end_point = 'https://www.indopremier.com/ipotgo/lp-orderbook.php?ref=tg&code='
+        #! endpoint alamat order book IPOT
+        print(emiten)
+        waktu=datetime.now()
+        print(waktu)
+        
+        end_point = 'https://www.indopremier.com/ipotgo/lp-orderbook.php?ref=tg&code='
 
-		#! Menggabungkan alamat dengan daftar emiten 	
-		end_point= (end_point + emiten) 		
+        #! Menggabungkan alamat dengan daftar emiten 	
+        end_point= (end_point + emiten) 		
 
-		#* Mengolah infomasi saham menggunakan pandas				
+        #* Mengolah infomasi saham menggunakan pandas				
 
-		#? Menggunakan 'try/except' untuk membuang saham yang tidak dapat dipakai akibat inkonsistensi data 
-		#? di IPOT (M menggantikan '000 000, text/number, spasi, dst)  atau pun adanya saham2 yang bermasalah (saham gocap/suspend)				
+        #? Menggunakan 'try/except' untuk membuang saham yang tidak dapat dipakai akibat inkonsistensi data 
+        #? di IPOT (M menggantikan '000 000, text/number, spasi, dst)  atau pun adanya saham2 yang bermasalah (saham gocap/suspend)				
 
-		try:
+        try:
 
-			#* Merapikan data, membuang N/a dan kolom2 yang tidak perlu	
-			df = pd.read_html((end_point),na_values=["TOTAL"])
-			print (df)	 #for debug purpose only, abaikan
-			df_summary = df[0]
+            #* Merapikan data, membuang N/a dan kolom2 yang tidak perlu	
+            df = pd.read_html((end_point),na_values=["TOTAL"])
+            df_summary = df[0]
 
-			#* Mendapatkan lot saham hari ini			
-			lot= ( [ o  for o in[o for o in df_summary[7] ]][0]		)
+            #* Mendapatkan lot saham hari ini			
+            lot= ( [ o  for o in[o for o in df_summary[7] ]][0]		)
 
 #TODO: efisiensi: tambah filter berdasarkan lot sehingga tidak perlu diteruskan prosesnya ke 'df'
-			
-			df = df[1].head(11)		
-			df = (pd.DataFrame(df)[:-1]).dropna(how='all', axis='columns')
+            
+            df = df[1].head(11)		
+            df = (pd.DataFrame(df)[:-1]).dropna(how='all', axis='columns')
 
-		#	contoh informasi dari tarikan df_summary, emiten SMGR, 22-12-2020, 10:53:
-			#!	    0        1   2     3      4   5    6       7
-			#!	0  Prev  12500.0 NaN  Open  12300 NaN  Lot   17310
-			#!	1   Chg    -25.0 NaN  High  12700 NaN  Val  21.7 B
-			#!	2     %     -0.2 NaN   Low  12300 NaN  Avg   12511
+        #	contoh informasi dari tarikan df_summary, emiten SMGR, 22-12-2020, 10:53:
+            #!	    0        1   2     3      4   5    6       7
+            #!	0  Prev  12500.0 NaN  Open  12300 NaN  Lot   17310
+            #!	1   Chg    -25.0 NaN  High  12700 NaN  Val  21.7 B
+            #!	2     %     -0.2 NaN   Low  12300 NaN  Avg   12511
 
-		#	contoh  informasi dari tarikan df[1].head(11), emiten TLKM, 22-12-2020, 9:10:
+        #	contoh  informasi dari tarikan df[1].head(11), emiten TLKM, 22-12-2020, 9:10:
 
-			#!		BidLot     Bid   Offer  OffLot  
-			#!	0     883  3480.0  3490.0    5321       
-			#!	1   11140  3470.0  3500.0   18714       
-			#!	2   12924  3460.0  3510.0   18865       
-			#!	3   22291  3450.0  3520.0   18495       
-			#!	4   40204  3440.0  3530.0    3929      
-			#!	5   12071  3430.0  3540.0   12188      
-			#!	6   12883  3420.0  3550.0   40465        
-			#!	7   15595  3410.0  3560.0   15393        
-			#!	8   18868  3400.0  3570.0   26113      
-			#!	9    2531  3390.0  3580.0   14960       
+            #!		BidLot     Bid   Offer  OffLot  
+            #!	0     883  3480.0  3490.0    5321       
+            #!	1   11140  3470.0  3500.0   18714       
+            #!	2   12924  3460.0  3510.0   18865       
+            #!	3   22291  3450.0  3520.0   18495       
+            #!	4   40204  3440.0  3530.0    3929      
+            #!	5   12071  3430.0  3540.0   12188      
+            #!	6   12883  3420.0  3550.0   40465        
+            #!	7   15595  3410.0  3560.0   15393        
+            #!	8   18868  3400.0  3570.0   26113      
+            #!	9    2531  3390.0  3580.0   14960       
 
-			#* Menghitung potensi laba di orderbook dengan cara mengofset/mengurangkan lot jual dengan lot beli				
-			#* Mengubah format angka ke integer untuk memastikan konsistensi				
-			df['offsetting']=(df['OffLot'].astype(int)-df['BidLot'].astype(int))		
+            #* Menghitung potensi laba di orderbook dengan cara mengofset/mengurangkan lot jual dengan lot beli				
+            #* Mengubah format angka ke integer untuk memastikan konsistensi				
+            df['offsetting']=(df['OffLot'].astype(int)-df['BidLot'].astype(int))		
 
-			#* Menjumlah sisi bid dan offer agar menjadi kumulatif jumlahnya				
-			df['offsetting']=df['offsetting'].cumsum()		
+            #* Menjumlah sisi bid dan offer agar menjadi kumulatif jumlahnya				
+            df['offsetting']=df['offsetting'].cumsum()		
 
-			#* Menentukan harga berdasarkan tanda kumulatif (+: bid/-: offer, true= 1, false=0, true/false * harga)				
-			df['prc'] = ((df['offsetting'] > 0) * df['Bid'])  	
-			df['prc'] = abs(((df['offsetting'] <0) * df['Offer'])  - df['prc'] )
+            #* Menentukan harga berdasarkan tanda kumulatif (+: bid/-: offer, true= 1, false=0, true/false * harga)				
+            df['prc'] = ((df['offsetting'] > 0) * df['Bid'])  	
+            df['prc'] = abs(((df['offsetting'] <0) * df['Offer'])  - df['prc'] )
+            df['sign'] =  (df['offsetting'] > 0) 	
+            df['sign'] =  ((df['offsetting'] < 0) )  	
 
-		#	contoh olahan tarikan, emiten TLKM, 22-12-2020, 9:10:
-		#!			BidLot     Bid   Offer  OffLot  offsetting     prc
-			#!	0     883  3480.0  3490.0    5321        4438  3480.0
-			#!	1   11140  3470.0  3500.0   18714       12012  3470.0
-			#!	2   12924  3460.0  3510.0   18865       17953  3460.0
-			#!	3   22291  3450.0  3520.0   18495       14157  3450.0
-			#!	4   40204  3440.0  3530.0    3929      -22118  3530.0
-			#!	5   12071  3430.0  3540.0   12188      -22001  3540.0
-			#!	6   12883  3420.0  3550.0   40465        5581  3420.0
-			#!	7   15595  3410.0  3560.0   15393        5379  3410.0
-			#!	8   18868  3400.0  3570.0   26113       12624  3400.0
-			#!	9    2531  3390.0  3580.0   14960       25053  3390.0
+            print (df)	 #for debug purpose only, abaikan
+            print ('df[prc]',df['prc'])	#for debug purpose only, abaikan
+
+        #	contoh olahan tarikan, emiten TLKM, 22-12-2020, 9:10:
+        #!			BidLot     Bid   Offer  OffLot  offsetting     prc
+            #!	0     883  3480.0  3490.0    5321        4438  3480.0
+            #!	1   11140  3470.0  3500.0   18714       12012  3470.0
+            #!	2   12924  3460.0  3510.0   18865       17953  3460.0
+            #!	3   22291  3450.0  3520.0   18495       14157  3450.0
+            #!	4   40204  3440.0  3530.0    3929      -22118  3530.0
+            #!	5   12071  3430.0  3540.0   12188      -22001  3540.0
+            #!	6   12883  3420.0  3550.0   40465        5581  3420.0
+            #!	7   15595  3410.0  3560.0   15393        5379  3410.0
+            #!	8   18868  3400.0  3570.0   26113       12624  3400.0
+            #!	9    2531  3390.0  3580.0   14960       25053  3390.0
 
 #FIXME:
-		#	contoh  tarikan ngaco, emiten FREN, 22-12-2020, 11:21, filter out, tidak bisa diolah lebih lanjut sebelum didecoding masalahnya:
-			#!		BidLot   Bid  Offer  OffLot
-			#!	0  2.0 M  71.0   72.0  888172
-			#!	1  2.4 M  70.0   73.0   1.4 M
-			#!	2  1.4 M  69.0   74.0   1.7 M
-			#!	3  1.1 M  68.0   75.0   2.0 M
-			#!	4  1.5 M  67.0   76.0   1.1 M
-			#!	5      0   0.0   77.0   1.0 M
-			#!	6      0   0.0   78.0   1.1 M
-			#!	7      0   0.0   79.0  939895
-			#!	8      0   0.0   80.0   2.1 M
-			#!	9      0   0.0   81.0   1.0 M
-	
+        #	contoh  tarikan ngaco, emiten FREN, 22-12-2020, 11:21, filter out, tidak bisa diolah lebih lanjut sebelum didecoding masalahnya:
+            #!		BidLot   Bid  Offer  OffLot
+            #!	0  2.0 M  71.0   72.0  888172
+            #!	1  2.4 M  70.0   73.0   1.4 M
+            #!	2  1.4 M  69.0   74.0   1.7 M
+            #!	3  1.1 M  68.0   75.0   2.0 M
+            #!	4  1.5 M  67.0   76.0   1.1 M
+            #!	5      0   0.0   77.0   1.0 M
+            #!	6      0   0.0   78.0   1.1 M
+            #!	7      0   0.0   79.0  939895
+            #!	8      0   0.0   80.0   2.1 M
+            #!	9      0   0.0   81.0   1.0 M
+    
 
-			#* Memisahkan hasil ofset ke dalam list				
-			prc_list= [ o  for o in[o for o in df['prc'] ]]
+            #* Memisahkan hasil ofset ke dalam list				
+            prc_list= [ o  for o in[o for o in df['prc'] ]]
+            print ('prc_list A',prc_list)	#for debug purpose only, abaikan
 
-			#* Mendapatkan indikasi jual/beli dengan mengurangkan order book urutan row i dan i-1		
-			prc_list=  [prc_list[i] for i in range(0, len(prc_list)) if  prc_list[i - 1] - prc_list[i] < 0 ]
-			
-			print ('prc_list',prc_list)	#for debug purpose only, abaikan
+            #* Mendapatkan indikasi jual/beli dengan mengurangkan order book urutan row i dan i-1		
+            prc_list=  [prc_list[i] for i in range(0, len(prc_list)) if  prc_list[i - 1] - prc_list[i] < 0 ]
+            
+            print ('prc_list',prc_list)	#for debug purpose only, abaikan
 
-			#* Mendapatkan harga saham hari sebelumnya			
-			harga_pembukaan = int( [ o  for o in[o for o in df_summary[1] ]][0]		)
+            #* Mendapatkan harga saham hari sebelumnya			
+            harga_pembukaan = int( [ o  for o in[o for o in df_summary[1] ]][0]		)
 
-		#* Memberi nilai untuk semua angka ngaco agar perhitungan selanjutnya tidak error
-		except:
-			prc_list = []
-			df=[]
-			print('AAA')
-			print(df)
+            #* Mendapatkan best bid			
+            best_bid =  max(df['Bid'])	
+
+        #* Memberi nilai untuk semua angka ngaco agar perhitungan selanjutnya tidak error
+        except:
+            prc_list = []
+            df=[]
+            print(df)
 #			df['offsetting']=[]
 #			df['prc']	=[]
-			harga_pembukaan  = 0
+            harga_pembukaan  = 0
 
-		#* Menghitung potensi laba Rp/ %, 0 bila price list hanya ada 1/kosong [] dan harga 50
-		jual=0 if (len(prc_list) == 1 or harga_pembukaan  ==50 or prc_list == []) else max (prc_list)
-		beli=0 if (len(prc_list) == 1 or harga_pembukaan  ==50 or prc_list == []) else  min(prc_list)
-		laba_rp= 0 if ( jual - beli == 0 or harga_pembukaan  ==50 or prc_list == []) else (( jual - beli )) #Rp
-		labaPct=  0 if laba_rp==0 else round(laba_rp/ beli * 100,2) #%
+        #* Menghitung potensi laba Rp/ %, 0 bila price list hanya ada 1/kosong [] dan harga 50
+        jual=0 if (len(prc_list) == 1  or prc_list == []) else max (prc_list)
+        beli=0 if (len(prc_list) == 1 or prc_list == []) else  min(prc_list)
+        laba_rp= 0 if ( jual - beli == 0 or harga_pembukaan  ==50 or prc_list == []) else (( jual - beli )) #Rp
+        labaPct=  0 if laba_rp==0 else round(laba_rp/ beli * 100,2) #%
 
-		#* Menghitung jumlah langkah (laba/fraksi)
-		langkah= 0 if prc_list == [] else step_fr_buy_to_sell ( laba_rp, harga_pembukaan )
+        #* Menghitung jarak penyelesaiann transaksi (laba/fraksi)
+        jarakBeliKeJual = 0 if prc_list == [] else step_fr_buy_to_sell ( laba_rp, harga_pembukaan )
+        jarakBelikeMid = 0 if prc_list == [] else step_fr_buy_to_sell ( (best_bid-beli), best_bid )
 
-		#* Menghitung kriteria lanjutan saham layak beli
+        #* Contoh mengapa jarak beli ke Mid price penting: solusi perlu dioptimalisasi, lebih baik bisa menunjuk langsung ke 490
+        #!	BidLot    Bid  Offer  OffLot  offsetting    prc
+        #!	0     162  510.0  520.0     545         383  510.0
+        #!	1      78  505.0  525.0     888        1193  505.0
+        #!	2     614  500.0  530.0    1779        2358  500.0
+        #!	3      77  498.0  535.0     374        2655  498.0
+        #!	4     261  496.0  540.0       3        2397  496.0
+        #!	5     795  494.0  545.0     556        2158  494.0
+        #!	6     334  492.0  550.0     689        2513  492.0
+        #!	7    4682  490.0  555.0     168       -2001  555.0
+        #!	8       0    0.0  560.0     305       -1696  560.0
+        #!	9       0    0.0  565.0      92       -1604  565.0
+            #! Tanpa menghitung jarak ke midprice, maka 'MBSS mjd layak beliL beli 555.0 jual 565.0 laba 1.8  langkah 2'
+            #! padahal 
 
-		#*tes kesehatan order book/ob, dianggap sehat bila minimum ada 100 lot		
 
-		#* tarik populasi orderbook net (bid-sell)		
-	
+        #* Menghitung kriteria lanjutan saham layak beli
 
-		#* cari jumlah minimum dari populasi order book		
-		try:
+        #*tes kesehatan order book/ob, dianggap sehat bila minimum ada 100 lot		
 
-			ob_oke =[ o  for o in[o for o in df['offsetting'] ]]
+        #* tarik populasi orderbook net (bid-sell)		
+    
 
-		except:
+        #* cari jumlah minimum dari populasi order book		
+        try:
 
-			ob_oke = 0
+            ob_oke =[ o  for o in[o for o in df['offsetting'] ]]
 
-		ob_oke =0 if ob_oke==0 else  min ((max (ob_oke)) , abs(min(ob_oke)))
+        except:
 
-		layak_beli = True if testing == True else labaPct >1 and langkah < 5 and ob_oke  > 100
+            ob_oke = 0
 
-		hasil=(emiten,'layak_beli',layak_beli,'harga_pembukaan ',harga_pembukaan ,'laba',labaPct,langkah,ob_oke) #for debug purpose only, abaikan
+        ob_oke =0 if ob_oke==0 else  min ((max (ob_oke)) , abs(min(ob_oke)))
+        mid_prc= (jual + beli)/2
 
-		#* Menggabungkan saham layak beli ke dalam list
-		if layak_beli:
+        jarak=4
+        layak_beli = True if testing == True else labaPct >1 and jarakBeliKeJual  < jarak and ob_oke  > 100 and jarakBelikeMid < jarak and  harga_pembukaan  != 50
 
-			print(telegram_bot_sendtext(f"{emiten} beli {beli} jual {jual} laba {labaPct}  langkah {langkah} ")	    ) 
+        hasil=(emiten,'layak_beli',layak_beli,'harga_pembukaan ',harga_pembukaan ,'laba',labaPct,jarakBeliKeJual ,ob_oke) #for debug purpose only, abaikan
 
-			result.append({
-				"saham":emiten,
-				"beli":beli,
-				"jual":jual,
-				"laba":labaPct,
-				"jarak":langkah
-			})
+        #* Menggabungkan saham layak beli ke dalam list
+        if layak_beli:
 
-	#! Merapikan data: sort & tabel		
-	#* sort list berdasarkan jarak
-	result  = sorted((result), key=lambda k: k['jarak'])
+            (telegram_bot_sendtext(f"{emiten} mid_prc {mid_prc}  beli {beli} jual {jual} laba {labaPct}  jarak Beli ke Jual  {jarakBeliKeJual } ")	    ) 
 
-	#* ganti format list ke dataframe
-	result  = (pd.DataFrame(result)	)
+            if testing == False:
+                result.append({
+                "saham":emiten,
+                "mid_prc":mid_prc,
+                "beli":beli,
+                "jual":jual,
+                "laba":labaPct,
+                "jarak":jarakBeliKeJual 
+            })
 
-	#* sort dataframe berdasarkan jarak (redudansi?)
-	result.sort_values(by=['jarak'], inplace=True, ascending=True)
 
-	#* agar index dimulai dari 1, bukan 0
-	result.index += 1 
+            if testing == True:
+                result.append({
+                "saham":emiten,
+                "prev_prc":harga_pembukaan,
+                "beli":beli,
+                "jual":jual,
+                "laba":labaPct,
+                "jarak":jarakBeliKeJual 
+            })
+            import json
+            with open('outputfile', 'w') as fout:
+                waktu=datetime.now()
+#		result.append({"tanggal":waktu}			)
+#		print('result AAA',result)		
+                json.dump(result, fout)
+                
+    #! Merapikan data: sort & tabel		
+    #* sort list berdasarkan jarak
+    result  = sorted((result), key=lambda k: k['jarak'])
+    
+    #* ganti format list ke dataframe
+    result  = (pd.DataFrame(result)	)
 
-	print(result) #for debug purpose only, abaikan
- 
-	return (result)
+    #* sort dataframe berdasarkan jarak (redudansi?)
+    result.sort_values(by=['jarak'], inplace=True, ascending=True)
+    
+
+    #* agar index dimulai dari 1, bukan 0
+    result.index += 1 
+
+    print(result) #for debug purpose only, abaikan
+
+    return (result)
 
 
 def tabulasi ():
 
-	'''
-		Merapikan list saham dalam format keluaran yang disesuaikan dengan user: e mail/telegram/screen komputer
+    '''
+        Merapikan list saham dalam format keluaran yang disesuaikan dengan user: e mail/telegram/screen komputer
 
-		 Returns:           
-			 List saham dalam bentuk tabulasi menggunakan tabulate
-	'''
+        Returns:           
+            List saham dalam bentuk tabulasi menggunakan tabulate
+    '''
 
-	#! Modul untuk merapikan tabel	
-	from tabulate import tabulate
+    #! Modul untuk merapikan tabel	
+    from tabulate import tabulate
 
 #FIXME:
-	#* menyiapkan isi e mail
+    #* menyiapkan isi e mail
 
-	html = """
-	<html>
-	<head>
-	<style> 
-	table, th, td {{ border: 1px solid black; border-collapse: collapse; }}
-	th, td {{ padding: 5px; }}
-	</style>
-	</head>
-	<body><p>Hi All,</p>
+    html = """
+    <html>
+    <head>
+    <style> 
+    table, th, td {{ border: 1px solid black; border-collapse: collapse; }}
+    th, td {{ padding: 5px; }}
+    </style>
+    </head>
+    <body><p>Hi All,</p>
 
-	<p> Berikut adalah tarikan order book saham yang memiliki potensi laba untuk dicek ulang:  </p>
-	<p> Hati-hati dengan delay data + kesalahan formula. Tetap harus menghitung manual/konfirmasi visual sebelum memutuskan transaksi  </p>
-	{table}
+    <p> Berikut adalah tarikan order book saham yang memiliki potensi laba untuk dicek ulang:  </p>
+    <p> Hati-hati dengan delay data + kesalahan formula. Tetap harus menghitung manual/konfirmasi visual sebelum memutuskan transaksi  </p>
+    {table}
 
-	<p> Parameter filter (untuk ditune up): Harga: > 60, Laba: > 1 %', Lot: > 100, Jarak: < 5 </p>
-	
-	<p>Jadwal penarikan data:<br>
-       Pembukaan sesi 1: 09:35 --> mendapatkan pandangan cepat pasar <br>
-       Tengah sesi 1   : 10:05 --> Informasi tambahan <br>
-       Penutupan sesi 1: 11:35 --> persiapan sesi 2 <br>
-       Pembukaan sesi 2: 13:35 --> mendapatkan pandangan cepat pasar <br>
-       Penutupan sesi 2: 22:00 --> persiapan sesi besok <br>
+    <p> Parameter filter (untuk ditune up): Harga: > 60, Laba: > 1 %', Lot: > 100, Jarak: < 5 </p>
+    
+    <p>Jadwal penarikan data:<br>
+    Pembukaan sesi 1: 09:35 --> mendapatkan pandangan cepat pasar <br>
+    Tengah sesi 1   : 10:05 --> Informasi tambahan <br>
+    Penutupan sesi 1: 11:35 --> persiapan sesi 2 <br>
+    Pembukaan sesi 2: 13:35 --> mendapatkan pandangan cepat pasar <br>
+    Penutupan sesi 2: 22:00 --> persiapan sesi besok <br>
     </p>
 
     <p><a href="https://github.com/venoajie/draf"> Source code</a> 
- 
+
     </p>
 
-	</body></html>
-	"""
+    </body></html>
+    """
 
-	#! Menarik data yang sudah diekstraksi	
-	result=ekstraksi_data()
+    #! Menarik data yang sudah diekstraksi	
+    result=ekstraksi_data()
 
-	#* merapikan hasil dengan tabulate
-	col_list=list(result.columns.values)
-	keluaran = html.format(table=tabulate(result, headers=col_list, tablefmt="html",showindex=True))
+    #* merapikan hasil dengan tabulate
+    col_list=list(result.columns.values)
+    keluaran = html.format(table=tabulate(result, headers=col_list, tablefmt="html",showindex=True))
 #!	keluaran = html.format(table=tabulate(result, headers="keys", tablefmt="html",showindex=True)) --> alternatif, tanpa col list
 
-	#* mengirimkan hasil by e mail
-	(send_mail(keluaran))
-	my_message=  'Penarikan data selesai'
-	(telegram_bot_sendtext(my_message)	    ) 
+    #* mengirimkan hasil by e mail
+    
+    my_message=  'Penarikan data selesai'
+    (telegram_bot_sendtext(my_message)	    )
+    if testing == False:
+        (send_mail(keluaran))
 
-	return result
+    return result
 
 #! eksekusi
 (tabulasi())
-
