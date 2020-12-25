@@ -15,9 +15,6 @@ import requests
 #modul speed up pandas
 from functools import lru_cache
 
-# download saham dan harga saham
-import data_emiten
-
 # tes memori formula
 from sys import getsizeof 
 
@@ -25,9 +22,7 @@ from sys import getsizeof
 testing =  True  #or False
 
 
- 
 def send_mail(body):
-
 
 	# modul kirim email by google
     from smtplib import SMTP
@@ -62,8 +57,6 @@ def telegram_bot_sendtext(bot_message):
 
 	return response.json()
 
-
-
 #TODO: Logger
 
 def get_logger( name, log_level ):
@@ -97,18 +90,30 @@ def restart_program():
 	os.execl(python, python, * sys.argv)
 
 
-# Jangan proses kalau sabtu/minggu (menyesuaikan dengan waktu UTC)
-waktu=datetime.today() #mendapatkan waktu saat ini
-waktu_kerja_jakarta=  int((waktu + (timedelta(hours = 7))).strftime('%w'))
-waktu_kerja_jakarta =6
+def cek_hari_kerja () : #!--> integer
 
+    '''
+        Mengecek apakah sekarang hari kerja bursa
+        +  #mendapatkan waktu UTC saat ini 
+        +  Mengubah waktu UTC ke Jakarta
+                        
+        Returns:           
+            hari kerja: 1-5, libur: 6-7
+
+    '''
+    return int(((datetime.today()) + (timedelta(hours = 7))).strftime('%w'))
+
+waktu_kerja_jakarta=cek_hari_kerja () 
+
+ #Jangan proses kalau sabtu/minggu
 if testing == False and waktu_kerja_jakarta > 5:
     my_message=  'Sabtu/Minggu, no data'
     (telegram_bot_sendtext(my_message)	    )
+#! bagaimana behaviour di linux?
     x=5/0
 
-my_message=  'Mulai penarikan data'
-(telegram_bot_sendtext(my_message)	    ) 
+#* update status melalui telegram
+(telegram_bot_sendtext((f"Mulai penarikan data, hari kerja {waktu_kerja_jakarta}, testing {testing}"))	    ) 
 
 
 #class OrderBook(object):  
@@ -161,17 +166,28 @@ def  emiten_saham () : #!--> list
             Nama2 emiten saham terpilih
 
     '''
+
+    # download saham dan harga saham
+    import data_emiten
     
+    #* Menarik seluruh saham beserta atribut harganya dari daftar 
     populasi=data_emiten.data_emiten()
+    
+    #* Filter saham 1: harga 50 dikeluarkan
     emiten_harga_gocap=[ o['saham'] for o in[o for o in populasi if int(o['mid_prc']) < 60]] 
+ 
+    #* Hanya nama saham saja
     populasi= [ o['saham'] for o in[o for o in populasi ]]
 
+    #* Filter saham 2: harga 50 dikeluarkan + emiten bermasalah (ditambahkan secara manual)
     emiten_bermasalah=list(['KPAL','BLTA'] + emiten_harga_gocap)
- #   print('emiten_bermasalah',emiten_bermasalah,len(emiten_bermasalah))
+
+    #* Untuk kepentingan testing, abaikan
     emiten_code_bumn=['WEHA','INPC','ABBA','KPAL','BLTA']#,'BMRI','JSMR','PGAS','ANTM','KRAS','GIAA','IPCC','WSKT','ANTM']
-#	emiten_code_bumn = [o for o in emiten_code_bumn if o not in emiten_bermasalah]
-    emiten_saham = emiten_code_bumn if testing == True else [o for o in populasi if o not in emiten_bermasalah]
 #https://stackoverflow.com/questions/50665276/appending-dataframe-data-to-a-json-file-without-deleting-previous-content
+
+    #* Emiten saham terseleksi (populasi minus saham bermasalah)
+    emiten_saham = emiten_code_bumn if testing == True else [o for o in populasi if o not in emiten_bermasalah]
 
     return (emiten_saham)
 
@@ -357,7 +373,9 @@ def ekstraksi_data():  #!--> list
         ob_oke =0 if ob_oke==0 else  min ((max (ob_oke)) , abs(min(ob_oke)))
         mid_prc= (jual + beli)/2
 
+        #* filter data berdasarkan jarak		
         jarak=4
+
         layak_beli = True if testing == True else labaPct >1 and jarakBeliKeJual  < jarak and ob_oke  > 100 and jarakBelikeMid < jarak and  harga_pembukaan  != 50
 
         hasil=(emiten,'layak_beli',layak_beli,'harga_pembukaan ',harga_pembukaan ,'laba',labaPct,jarakBeliKeJual ,ob_oke) #for debug purpose only, abaikan
@@ -390,12 +408,10 @@ def ekstraksi_data():  #!--> list
             import json
             with open('outputfile', 'w') as fout:
                 waktu=datetime.now()
-                
-#		result.append({"tanggal":waktu}			)
-#		print('result AAA',result)		
                 json.dump(result, fout)
 
     #! Merapikan data: sort & tabel		
+
     #* sort list berdasarkan jarak
     result  = sorted((result), key=lambda k: k['jarak'])
     
@@ -478,13 +494,16 @@ def tabulasi ():
     keluaran = html.format(table=tabulate(result, headers=col_list, tablefmt="html",showindex=True))
 #!	keluaran = html.format(table=tabulate(result, headers="keys", tablefmt="html",showindex=True)) --> alternatif, tanpa col list
 
-    #* mengirimkan hasil by e mail    
+    #* mengirimkan hasil satu per satu by telegram   
     my_message=  'Penarikan data selesai'
     (telegram_bot_sendtext(my_message)	    )
-    (send_mail(keluaran))
+
+    #* mengirimkan hasil keseluruhan by e mail    
+    print((send_mail(keluaran)))
 
     return result
 
 #! eksekusi
 (tabulasi())
+
 
